@@ -1,17 +1,36 @@
+
 require("dotenv").config()
 const express = require("express")
 const mongoose = require("mongoose")
+const { AuthRouter } = require("./Routes/auth.routes")
+// const { OwnerRouter } = require("./Routes/owner.routes")
+// const { AdminRouter } = require("./Routes/admin.routes")
+const cors = require("cors")
+const cp = require("cookie-parser")
+// const { addUser } = require("./Utils/AddOwner")
 const { addOwner } = require("./Utils/AddOwner")
 
 const app = express()
+
+app.use(cors({
+    credentials : true // allowing browser to request cookies
+}))
+app.use(cp())
+app.use(express.json())
+app.use("/api/auth", AuthRouter)
+// app.use("/api/owner", OwnerRouter)
+// app.use("/api/admin", AdminRouter)
 
 
 
 mongoose.connect(process.env.DB_URL)
 .then(() => {
+    // addUser("Testing123!", "DemoUser", "demo@something.com", "admin")
+
+//    addOwner("maisabkabhagwan", "vikky", "vikky@example.com")
+
     console.log("Database connected")
-    
-    // addOwner("maisabkabhagwan", "ajit", "ajit@example.com")
+
     const port = process.env.PORT || 8080
 
     app.listen(port, () => {
@@ -24,3 +43,12 @@ mongoose.connect(process.env.DB_URL)
 
 
 
+app.use((err, req, res, next) => {
+    // console.log(err)
+    res
+    .status(err.status || 400)
+    .json({
+        message : err.message
+    })
+})
+// will my error not be stuck on the upper app.use()?
