@@ -9,11 +9,11 @@ const
     getOrgsById, 
     deleteOrg, 
     updateOrg, 
-    // createAdmin, 
-    // getAllAdmins, 
-    // getAdminById,
-    // activateAdmin,
-    // deactivateAdmin
+    createAdmin, 
+    getAllAdmins, 
+    getAdminById,
+    activateAdmin,
+    deactivateAdmin
     
 } = require('../Controllers/owner.controller')
 const router = express.Router()
@@ -43,11 +43,11 @@ router.patch("/:id", isLoggedIn, authorize("owner"), updateOrg)
   - Owner APIs for Admin
 */
 
-// router.post("/organization/:id/admin", isLoggedIn, authorize("owner"), createAdmin)
-// router.get("/organization/:id/admin", isLoggedIn, authorize("owner"), getAllAdmins)
-// router.get("/admin/:id", isLoggedIn, authorize("owner"), getAdminById)
-// router.patch("/admin/:id", isLoggedIn, authorize("owner"), activateAdmin)
-// router.delete("/admin/:id", isLoggedIn, authorize("owner"), deactivateAdmin)
+router.post("/organization/:id/admin", isLoggedIn, authorize("owner"), createAdmin)
+router.get("/organization/:id/admin", isLoggedIn, authorize("owner"), getAllAdmins)
+router.get("/admin/:id", isLoggedIn, authorize("owner"), getAdminById)
+router.patch("/admin/:id", isLoggedIn, authorize("owner"), activateAdmin)
+router.delete("/admin/:id", isLoggedIn, authorize("owner"), deactivateAdmin)
 
 
 module.exports = {
