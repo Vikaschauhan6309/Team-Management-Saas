@@ -40,8 +40,9 @@ const UserSchema = new mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref:"organization",
     },
-    teamdId : {
-        type : mongoose.Schema.Types.ObjectId
+    teamId : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "Team"
     },
 
     isActive : {

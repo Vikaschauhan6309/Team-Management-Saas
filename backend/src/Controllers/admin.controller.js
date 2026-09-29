@@ -140,158 +140,160 @@ const updateTeam = async(req, res) => {
     })
 }
 
-// const createEmployee = async(req, res) => {
+
+//---------------------------Make Employee and Task related functions in separate controller file----------------------------
+
+
+
+const createEmployee = async(req, res) => {
     
-//     const{ teamId } = req.params
+    const{ teamId } = req.params
 
-//     if(!mongoose.Types.ObjectId.isValid(teamId))
-//     {
-//         throw new AppError(400, "Invalid ID")
-//     }
+    if(!mongoose.Types.ObjectId.isValid(teamId))
+    {
+        throw new AppError(400, "Invalid ID")
+    }
 
-//     const foundTeam = await Team.findOne({
-//         _id : teamId,
-//         organizationId : req.user.organizationId._id
-//     })
+    const foundTeam = await Team.findOne({
+        _id : teamId,
+        organizationId : req.user.organizationId._id
+    })
 
-//     if(!foundTeam)
-//     {
-//         throw new AppError(404, "Team does not exists")
-//     }
+    if(!foundTeam)
+    {
+        throw new AppError(404, "Team does not exists")
+    }
 
-//     const{ name, password, email } = req.body
+    const{ name, password, email } = req.body
 
-//     if(!name || !name.trim() || name.trim().length > 20 || name.trim().length < 2)
-//     {
-//         throw new AppError(400, "Invalid name")
-//     }
+    if(!name || !name.trim() || name.trim().length > 20 || name.trim().length < 2)
+    {
+        throw new AppError(400, "Invalid name")
+    }
 
-//     if(!validator.isEmail(email))
-//     {
-//         throw new AppError(400, "Invalid Email")
-//     }
+    if(!validator.isEmail(email))
+    {
+        throw new AppError(400, "Invalid Email")
+    }
 
-//     if(!validator.isStrongPassword(password))
-//     {
-//         throw new AppError(400, "Please enter a strong password")
-//     }
+    if(!validator.isStrongPassword(password))
+    {
+        throw new AppError(400, "Please enter a strong password")
+    }
 
-//     const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(password, 10)
 
-//     const createdUser = await User.create({
-//         password : hashedPassword,
-//         name, 
-//         email, 
-//         role : "employee",
-//         organizationId : req.user.organizationId._id,
-//         teamdId : teamId
-//     })
+    const createdUser = await User.create({
+        password : hashedPassword,
+        name, 
+        email, 
+        role : "employee",
+        organizationId : req.user.organizationId._id,
+        teamId : teamId
+    })
 
-//     res
-//     .status(201)
-//     .json({
-//         message :  `Employee (${name}) created successfully`,
-//         data : createEmployee
-//     })
-
-
-// }
-
-// const getAllEmployeesByTeamId = async(req, res) => {
-//     const{ teamId } = req.params
-
-//     if(!mongoose.Types.ObjectId.isValid(teamId))
-//     {
-//         throw new AppError(400, "Invalid ID")
-//     }
-
-//     const allEmployees = await User.find({
-//         teamdId : teamId,
-//         organizationId : req.user.organizationId._id
-//     })
+    res
+    .status(201)
+    .json({
+        message :  `Employee (${name}) created successfully`,
+        data : createEmployee
+    })
 
 
-//     res
-//     .status(200)
-//     .json({
-//         data : allEmployees
-//     })
-
-// }
+}
 
 
-// const deleteEmployee = async(req, res) => {
-//     const{ employeeId } = req.params
 
-//     if(!mongoose.Types.ObjectId.isValid(employeeId))
-//     {
-//         throw new AppError(400, "Invalid ID")
-//     }
+const getAllEmployeesByTeamId = async(req, res) => {
+    const{ teamId } = req.params
 
-//     const foundEmployee = await User.findOne({
-//         _id : employeeId,
-//         organizationId : req.user.organizationId._id
-//     })
+    if(!mongoose.Types.ObjectId.isValid(teamId))
+    {
+        throw new AppError(400, "Invalid ID")
+    }
 
-
-//     if(!foundEmployee)
-//     {
-//         throw new AppError(404, "User does not exists")
-//     }
-
-//     foundEmployee.isActive = false
-//     await foundEmployee.save()
-
-//     res
-//     .status(200)
-//     .json({
-//         message : "User deleted"
-//     })
-// }
-
-// const updateEmployee = async(req, res) => {
-//     const{ employeeId } = req.params
-
-//     if(!mongoose.Types.ObjectId.isValid(employeeId))
-//     {
-//         throw new AppError(400, "Invalid ID")
-//     }
-
-//     // const foundEmployee = await User.findOne({
-//     //     _id : employeeId,
-//     //     organizationId : req.user.organizationId._id
-//     // })
+    const allEmployees = await User.find({
+        teamdId : teamId,
+        organizationId : req.user.organizationId._id
+    })
 
 
-//     // if(!foundEmployee)
-//     // {
-//     //     throw new AppError(404, "User does not exists")
-//     // }
+    res
+    .status(200)
+    .json({
+        data : allEmployees
+    })
+
+}
+
+
+const deleteEmployee = async(req, res) => {
+    const{ employeeId } = req.params
+
+    if(!mongoose.Types.ObjectId.isValid(employeeId))
+    {
+        throw new AppError(400, "Invalid ID")
+    }
+
+    const foundEmployee = await User.findOne({
+        _id : employeeId,
+        organizationId : req.user.organizationId._id
+    })
+
+
+    if(!foundEmployee)
+    {
+        throw new AppError(404, "User does not exists")
+    }
+
+    foundEmployee.isActive = false
+    await foundEmployee.save()
+
+    res
+    .status(200)
+    .json({
+        message : "User deleted"
+    })
+}
+
+const updateEmployee = async(req, res) => {
+    const{ employeeId } = req.params
+
+    if(!mongoose.Types.ObjectId.isValid(employeeId))
+    {
+        throw new AppError(400, "Invalid ID")
+    }
+
+    
     
 
-//     const{teamId, isActive} = req.body
-//     // foundEmployee.teamdId = teamId
-//     // foundEmployee.isActive = isActive
+    const{teamId, isActive} = req.body
+   
 
-//     const foundEmployee = await User.findOneAndUpdate({_id : employeeId, organizationId : req.user.organizationId._id}, {teamdId : teamId, isActive}, {
-//         runValidators : true,
-//         returnDocument : "after"
-//     })
-
-//     User.fin
+    const foundEmployee = await User.findOneAndUpdate({_id : employeeId, organizationId : req.user.organizationId._id}, {teamId : teamId, isActive}, {
+        runValidators : true,
+        returnDocument : "after"
+    })
+ 
 
 
-//     // await foundEmployee.save()
+   
 
-//     res
-//     .status(200)
-//     .json({
-//         message : "User Updated",
-//         data : foundEmployee
-//     })
+    res
+    .status(200)
+    .json({
+        message : "User Updated",
+        data : foundEmployee
+    })
 
-// }
+}
 
+
+
+
+
+
+//---------------------------Make Employee and Task related functions in separate controller file----------------------------
 
 // const createTask = async (req, res) => {
 
@@ -515,10 +517,10 @@ module.exports = {
     getTeamById,
     deleteTeam,
     updateTeam,
-    // createEmployee,
-    // getAllEmployeesByTeamId,
-    // deleteEmployee,
-    // updateEmployee,
+    createEmployee,
+    getAllEmployeesByTeamId,
+    deleteEmployee,
+    updateEmployee,
     // createTask,
     // getAllTasks,
     // getTaskById,
