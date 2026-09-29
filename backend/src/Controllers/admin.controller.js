@@ -4,7 +4,7 @@ const { AppError } = require("../Utils/AppError")
 const { User } = require("../Models/User.schema")
 const bcrypt = require("bcrypt")
 const validator = require("validator")
-// const { Task } = require("../Models/Task.schema")
+const { Task } = require("../Models/Task.schema")
 
 
 const addTeam = async(req, res) => {
@@ -295,219 +295,221 @@ const updateEmployee = async(req, res) => {
 
 //---------------------------Make Employee and Task related functions in separate controller file----------------------------
 
-// const createTask = async (req, res) => {
+const createTask = async (req, res) => {
 
-//     const{ employeeId } = req.params
+    const{ employeeId } = req.params
 
-//     if(!mongoose.Types.ObjectId.isValid(employeeId))
-//     {
-//         throw new AppError(400, "Invalid ID")
-//     }
+    if(!mongoose.Types.ObjectId.isValid(employeeId))
+    {
+        throw new AppError(400, "Invalid ID")
+    }
 
-//     const foundEmployee = await User.findOne({
-//         _id : employeeId,
-//         organizationId : req.user.organizationId._id
-//     })
+    const foundEmployee = await User.findOne({
+        _id : employeeId,
+        organizationId : req.user.organizationId._id
+    })
 
-//     if(!foundEmployee)
-//     {
-//         throw new AppError(404, "Employee does not exists")
-//     }
+    if(!foundEmployee)
+    {
+        throw new AppError(404, "Employee does not exists")
+    }
 
-//     const{title, description, status, priority } = req.body
+    const{title, description, status, priority } = req.body
 
-//     if(!title || !title.trim() || title.trim().length > 100)
-//     {
-//         throw new AppError(400, "Invalid title")
-//     }
-
-
-//     if(!description || !description.trim() || description.trim().length > 300)
-//     {
-//         throw new AppError(400, "Invalid description")
-//     }
+    if(!title || !title.trim() || title.trim().length > 100)
+    {
+        throw new AppError(400, "Invalid title")
+    }
 
 
-//     if(!status || !status.trim() || !["todo", "in-progress", "completed"].includes(status.trim()))
-//     {
-//         throw new AppError(400, "Invalid status")
-//     }
+    if(!description || !description.trim() || description.trim().length > 300)
+    {
+        throw new AppError(400, "Invalid description")
+    }
 
 
-//     if(!priority || !priority.trim() || !["low", "medium", "high"].includes(priority.trim()))
-//     {
-//         throw new AppError(400, "Invalid priority")
-//     }
+    if(!status || !status.trim() || !["todo", "in-progress", "completed"].includes(status.trim()))
+    {
+        throw new AppError(400, "Invalid status")
+    }
 
 
-//     const createdTask = await Task.create({
-//         title, 
-//         description,
-//         status, 
-//         priority,
-//         organizationId : req.user.organizationId._id,
-//         teamId : foundEmployee.teamdId,
-//         assignedTo : employeeId,
-//         createdBy : req.user._id
-//     })
+    if(!priority || !priority.trim() || !["low", "medium", "high"].includes(priority.trim()))
+    {
+        throw new AppError(400, "Invalid priority")
+    }
+
+
+
+
+    const createdTask = await Task.create({
+        title, 
+        description,
+        status, 
+        priority,
+        organizationId : req.user.organizationId._id,
+        teamId : foundEmployee.teamId,
+        assignedTo : employeeId,
+        createdBy : req.user._id
+    })
     
-//     res
-//     .status(201)
-//     .json({
-//         message : "Task created",
-//         data : createdTask
-//     })
+    res
+    .status(201)
+    .json({
+        message : "Task created",
+        data : createdTask
+    })
 
 
-// }
+}
 
-// const getAllTasks = async(req, res) => {
-
-
-//     const allTasks = await Task.find({
-//         organizationId : req.user.organizationId._id
-//     })
-
-//     res
-//     .status(200)
-//     .json({
-//         data : allTasks
-//     })
-// }
+const getAllTasks = async(req, res) => {
 
 
-// const getTaskById = async(req, res) => {
-//     const { taskId } = req.params
+    const allTasks = await Task.find({
+        organizationId : req.user.organizationId._id
+    })
 
-//     if(!mongoose.Types.ObjectId.isValid(taskId))
-//     {
-//         throw new AppError(400, "Invalid ID")
-//     }
-
-//     const foundTask = await Task.findOne({
-//         _id : taskId,
-//         organizationId : req.user.organizationId._id
-//     })
+    res
+    .status(200)
+    .json({
+        data : allTasks
+    })
+}
 
 
-//     res
-//     .status(200)
-//     .json({
-//         data : foundTask
-//     })
+const getTaskById = async(req, res) => {
+    const { taskId } = req.params
+
+    if(!mongoose.Types.ObjectId.isValid(taskId))
+    {
+        throw new AppError(400, "Invalid ID")
+    }
+
+    const foundTask = await Task.findOne({
+        _id : taskId,
+        organizationId : req.user.organizationId._id
+    })
+
+
+    res
+    .status(200)
+    .json({
+        data : foundTask
+    })
 
     
 
-// }
+}
 
 
-// const deleteTask = async(req, res) => {
+const deleteTask = async(req, res) => {
 
-//     const { taskId } = req.params
+    const { taskId } = req.params
 
-//     if(!mongoose.Types.ObjectId.isValid(taskId))
-//     {
-//         throw new AppError(400, "Invalid ID")
-//     }
+    if(!mongoose.Types.ObjectId.isValid(taskId))
+    {
+        throw new AppError(400, "Invalid ID")
+    }
 
-//     const data = await Task.findOneAndDelete({
-//         _id : taskId,
-//         organizationId : req.user.organizationId._id
-//     })
+    const data = await Task.findOneAndDelete({
+        _id : taskId,
+        organizationId : req.user.organizationId._id
+    })
 
-//     console.log(data)
+     
 
-//     res
-//     .status(200)
-//     .json({
-//         message : "Done"
-//     })
+    res
+    .status(200)
+    .json({
+        message : "Done"
+    })
 
-// }
-
-
-// const updateTask = async(req, res) => {
-
-//     const { taskId } = req.params
-
-//     if(!mongoose.Types.ObjectId.isValid(taskId))
-//     {
-//         throw new AppError(400, "Invalid Task ID")
-//     }
-
-//     const{title, description, status, priority, assignedTo} = req.body
-
-//     if(!title || !title.trim() || title.trim().length > 100)
-//     {
-//         throw new AppError(400, "Invalid title")
-//     }
+}
 
 
-//     if(!description || !description.trim() || description.trim().length > 300)
-//     {
-//         throw new AppError(400, "Invalid description")
-//     }
+const updateTask = async(req, res) => {
+
+    const { taskId } = req.params
+
+    if(!mongoose.Types.ObjectId.isValid(taskId))
+    {
+        throw new AppError(400, "Invalid Task ID")
+    }
+
+    const{title, description, status, priority, assignedTo,teamId} = req.body
+
+    if(!title || !title.trim() || title.trim().length > 100)
+    {
+        throw new AppError(400, "Invalid title")
+    }
 
 
-//     if(!status || !status.trim() || !["todo", "in-progress", "completed"].includes(status.trim()))
-//     {
-//         throw new AppError(400, "Invalid status")
-//     }
+    if(!description || !description.trim() || description.trim().length > 300)
+    {
+        throw new AppError(400, "Invalid description")
+    }
 
 
-//     if(!priority || !priority.trim() || !["low", "medium", "high"].includes(priority.trim()))
-//     {
-//         throw new AppError(400, "Invalid priority")
-//     }
+    if(!status || !status.trim() || !["todo", "in-progress", "completed"].includes(status.trim()))
+    {
+        throw new AppError(400, "Invalid status")
+    }
 
 
-//     if(!teamId || !mongoose.Types.ObjectId.isValid(teamId))
-//     {
-//         throw new AppError(400, "Invalid TeamId")
-//     }
+    if(!priority || !priority.trim() || !["low", "medium", "high"].includes(priority.trim()))
+    {
+        throw new AppError(400, "Invalid priority")
+    }
 
 
-//     if(!assignedTo || !mongoose.Types.ObjectId.isValid(assignedTo))
-//     {
-//         throw new AppError(400, "Invalid EmployeeId")
-//     }
-
-//     const foundEmployee = await User.findById(assignedTo)
-
-//     if(!foundEmployee)
-//     {
-//         throw new AppError(404, "User not found")
-//     }
+    if(!teamId || !mongoose.Types.ObjectId.isValid(teamId))
+    {
+        throw new AppError(400, "Invalid TeamId")
+    }
 
 
-//     const updatedTask = await Task.findOneAndUpdate({
-//         _id : taskId,
-//         organizationId : req.user.organizationId._id
-//     }, {
-//         title,
-//         description,
-//         status,
-//         priority,
-//         teamId : foundEmployee.teamdId,
-//         assignedTo
-//     }, {
-//         runValidators : true,
-//         returnDocument : "after"
-//     })
+    if(!assignedTo || !mongoose.Types.ObjectId.isValid(assignedTo))
+    {
+        throw new AppError(400, "Invalid EmployeeId")
+    }
 
-//     if(!updatedTask)
-//     {
-//         throw new AppError(404, "Task not found")
-//     }
+    const foundEmployee = await User.findById(assignedTo)
 
-//     res
-//     .status(200)
-//     .json({
-//         message : "Task updated",
-//         data : updatedTask
-//     })
+    if(!foundEmployee)
+    {
+        throw new AppError(404, "User not found")
+    }
 
-// }
+
+    const updatedTask = await Task.findOneAndUpdate({
+        _id : taskId,
+        organizationId : req.user.organizationId._id
+    }, {
+        title,
+        description,
+        status,
+        priority,
+        teamId : foundEmployee.teamdId,
+        assignedTo
+    }, {
+        runValidators : true,
+        returnDocument : "after"
+    })
+
+    if(!updatedTask)
+    {
+        throw new AppError(404, "Task not found")
+    }
+
+    res
+    .status(200)
+    .json({
+        message : "Task updated",
+        data : updatedTask
+    })
+
+}
 
 
 
@@ -521,9 +523,9 @@ module.exports = {
     getAllEmployeesByTeamId,
     deleteEmployee,
     updateEmployee,
-    // createTask,
-    // getAllTasks,
-    // getTaskById,
-    // deleteTask,
-    // updateTask
+    createTask,
+    getAllTasks,
+    getTaskById,
+    deleteTask,
+    updateTask
 }
