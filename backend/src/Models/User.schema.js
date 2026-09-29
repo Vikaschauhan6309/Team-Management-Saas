@@ -37,7 +37,8 @@ const UserSchema = new mongoose.Schema({
         trim : true
     },
     organizationId : {
-        type : mongoose.Schema.Types.ObjectId
+        type : mongoose.Schema.Types.ObjectId,
+        ref:"organization",
     },
     teamdId : {
         type : mongoose.Schema.Types.ObjectId
@@ -45,7 +46,7 @@ const UserSchema = new mongoose.Schema({
 
     isActive : {
         type : Boolean,
-        default : true
+        default : true 
     }
 
 }, {
