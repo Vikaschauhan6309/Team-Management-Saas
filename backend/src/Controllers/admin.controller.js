@@ -213,7 +213,7 @@ const getAllEmployeesByTeamId = async(req, res) => {
     }
 
     const allEmployees = await User.find({
-        teamdId : teamId,
+        teamId : teamId,
         organizationId : req.user.organizationId._id
     })
 
@@ -437,7 +437,7 @@ const updateTask = async(req, res) => {
         throw new AppError(400, "Invalid Task ID")
     }
 
-    const{title, description, status, priority, assignedTo,teamId} = req.body
+    const{title, description, status, priority, assignedTo} = req.body
 
     if(!title || !title.trim() || title.trim().length > 100)
     {
@@ -463,10 +463,10 @@ const updateTask = async(req, res) => {
     }
 
 
-    if(!teamId || !mongoose.Types.ObjectId.isValid(teamId))
-    {
-        throw new AppError(400, "Invalid TeamId")
-    }
+    // if(!teamId || !mongoose.Types.ObjectId.isValid(teamId))
+    // {
+    //     throw new AppError(400, "Invalid TeamId")
+    // }
 
 
     if(!assignedTo || !mongoose.Types.ObjectId.isValid(assignedTo))
@@ -490,7 +490,7 @@ const updateTask = async(req, res) => {
         description,
         status,
         priority,
-        teamId : foundEmployee.teamdId,
+        teamId : foundEmployee.teamId,
         assignedTo
     }, {
         runValidators : true,

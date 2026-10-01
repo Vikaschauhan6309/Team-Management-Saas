@@ -5,6 +5,7 @@ const mongoose = require("mongoose")
 const { AuthRouter } = require("./Routes/auth.routes")
 const { OwnerRouter } = require("./Routes/owner.routes")
 const { AdminRouter } = require("./Routes/admin.routes")
+const { EmployeeRouter } = require("./Routes/employee.routes")
 const cors = require("cors")
 const cp = require("cookie-parser")
 // const { addUser } = require("./Utils/AddOwner")
@@ -20,7 +21,7 @@ app.use(express.json())
 app.use("/api/auth", AuthRouter)
 app.use("/api/owner", OwnerRouter)
 app.use("/api/admin", AdminRouter)
-
+app.use("/api/employee", EmployeeRouter)
 
 
 

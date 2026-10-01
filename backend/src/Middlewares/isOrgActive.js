@@ -1,22 +1,16 @@
-const { AppError } = require("../Utils/AppError")
+const { AppError } = require("../Utils/AppError");
 
 const isOrganizationActive = (req, res, next) => {
-    if(req.user.role == "owner")
-    {
-        next()
+  if (req.user.role == "owner") {
+    next();
+  } else {
+    if (!req.user.organizationId.isActive) {
+      throw new AppError(403, "Organization Inactive");
     }
-    else
-    {
-        if(!req.user.organizationId.isActive)
-        {
-            throw new AppError(403, "Organization Inactive")
-        }
-        next()
-    }
-}
-
-
+    next();
+  }
+};
 
 module.exports = {
-    isOrganizationActive
-}
+  isOrganizationActive,
+};
