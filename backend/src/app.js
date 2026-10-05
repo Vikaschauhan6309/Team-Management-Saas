@@ -14,6 +14,7 @@ const { addOwner } = require("./Utils/AddOwner")
 const app = express()
 
 app.use(cors({
+    origin :["http://localhost:5173","deployment_url"],
     credentials : true // allowing browser to request cookies
 }))
 app.use(cp())
