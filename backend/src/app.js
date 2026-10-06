@@ -6,6 +6,7 @@ const { AuthRouter } = require("./Routes/auth.routes")
 const { OwnerRouter } = require("./Routes/owner.routes")
 const { AdminRouter } = require("./Routes/admin.routes")
 const { EmployeeRouter } = require("./Routes/employee.routes")
+const { AnalyticsRouter } = require("./Routes/analytics.routes")
 const cors = require("cors")
 const cp = require("cookie-parser")
 // const { addUser } = require("./Utils/AddOwner")
@@ -23,7 +24,7 @@ app.use("/api/auth", AuthRouter)
 app.use("/api/owner", OwnerRouter)
 app.use("/api/admin", AdminRouter)
 app.use("/api/employee", EmployeeRouter)
-
+app.use("/api/analytics", AnalyticsRouter)  
 
 
 mongoose.connect(process.env.DB_URL)
