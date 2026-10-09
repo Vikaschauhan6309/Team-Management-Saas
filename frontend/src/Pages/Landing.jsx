@@ -1,735 +1,462 @@
-import React from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowRight,
-  Check,
-  ChevronRight,
-  CircleCheck,
-  ClipboardCheck,
-  Kanban,
-  LayoutDashboard,
-  MessageSquare,
-  ShieldCheck,
-  Users,
-  Zap,
-  Menu,
-  X,
+  ArrowRight, Bell, Check, ClipboardCheck, Crown, Menu, MessageSquare, Sparkles, TrendingUp, User, UserCog, Users, X, Zap,
 } from "lucide-react";
 
+/* Palette: ink #0E1530 · indigo #4338FF · mint #14B88A · sky #EEF1FF · paper #F8F9FD */
+
+const styles = `
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@400;500;600&display=swap');
+html{scroll-behavior:smooth}
+.tf-root{font-family:'DM Sans',system-ui,sans-serif}
+.tf-head{font-family:'Bricolage Grotesque','DM Sans',system-ui,sans-serif;letter-spacing:-0.03em}
+@keyframes tf-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes tf-fill{from{width:0}}
+@keyframes tf-ping{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.6);opacity:0}}
+@keyframes tf-draw{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes tf-blob{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(50px,36px) scale(1.15)}}
+@keyframes tf-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes tf-grad{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes tf-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes tf-shine{0%{transform:translateX(-120%) skewX(-20deg)}60%,100%{transform:translateX(420%) skewX(-20deg)}}
+@keyframes tf-glow{0%,100%{box-shadow:0 0 0 0 rgba(67,56,255,0)}20%{box-shadow:0 0 0 10px rgba(67,56,255,.18)}45%{box-shadow:0 0 0 0 rgba(67,56,255,0)}}
+@keyframes tf-travel{0%{top:0;opacity:0}10%{opacity:1}85%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes tf-check{0%,8%{background:#fff;border-color:#cbd5e1}16%,84%{background:#14B88A;border-color:#14B88A}94%,100%{background:#fff;border-color:#cbd5e1}}
+@keyframes tf-strike{0%,8%{color:#0E1530}16%,84%{color:#94a3b8;text-decoration:line-through}94%,100%{color:#0E1530;text-decoration:none}}
+@keyframes tf-msg{0%,6%{opacity:0;transform:translateY(12px) scale(.96)}14%,86%{opacity:1;transform:none}94%,100%{opacity:0;transform:translateY(-6px)}}
+@keyframes tf-dot{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-4px);opacity:1}}
+@keyframes tf-toast{0%,10%{opacity:0;transform:translateY(14px) scale(.95)}18%,78%{opacity:1;transform:none}88%,100%{opacity:0;transform:translateY(-10px)}}
+.tf-rise{opacity:0;animation:tf-rise .8s cubic-bezier(.2,.7,.2,1) forwards}
+.tf-fill{animation:tf-fill 1.6s .3s cubic-bezier(.2,.7,.2,1) backwards}
+.tf-ping{animation:tf-ping 2s ease-out infinite}
+.tf-line{transform-origin:top;animation:tf-draw 1.4s .5s ease-out backwards}
+.tf-blob{animation:tf-blob 16s ease-in-out infinite}
+.tf-float{animation:tf-float 5.5s ease-in-out infinite}
+.tf-grad{background-size:200% auto;animation:tf-grad 6s linear infinite}
+.tf-marquee{animation:tf-marquee 32s linear infinite}
+.tf-marquee-wrap:hover .tf-marquee{animation-play-state:paused}
+.tf-shine{position:relative;overflow:hidden}
+.tf-shine::after{content:"";position:absolute;inset:0;width:28%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:tf-shine 3.4s ease-in-out infinite}
+.tf-glow{animation:tf-glow 5s ease-in-out infinite}
+.tf-travel{animation:tf-travel 5s ease-in-out infinite}
+.tf-check{animation:tf-check 9s ease-in-out infinite}
+.tf-strike{animation:tf-strike 9s ease-in-out infinite}
+.tf-msg{opacity:0;animation:tf-msg 10s ease-in-out infinite}
+.tf-dot{animation:tf-dot 1.2s ease-in-out infinite}
+.tf-toast{opacity:0;animation:tf-toast 9s ease-in-out infinite}
+.tf-reveal{opacity:0;transform:translateY(32px) scale(.98);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.tf-reveal.tf-in{opacity:1;transform:none}
+.tf-swap{animation:tf-rise .5s cubic-bezier(.2,.7,.2,1) both}
+.tf-lift{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+.tf-lift:hover{transform:translateY(-6px);box-shadow:0 24px 50px -20px rgba(67,56,255,.35)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.tf-rise,.tf-reveal,.tf-swap,.tf-msg,.tf-toast{animation:none;opacity:1;transform:none;transition:none}.tf-fill,.tf-ping,.tf-line,.tf-blob,.tf-float,.tf-grad,.tf-marquee,.tf-shine::after,.tf-glow,.tf-travel,.tf-check,.tf-strike,.tf-dot{animation:none}.tf-lift:hover{transform:none}}
+.tf-root :focus-visible{outline:2px solid #4338FF;outline-offset:3px;border-radius:8px}
+`;
+
+const NAV = [["The idea", "#idea"], ["Roles", "#roles"], ["Features", "#features"]];
+const MARQUEE = ["Organizations", "Administrators", "Teams", "Employees", "Tasks", "Priorities", "Team chat", "Progress tracking", "Role-based access"];
+
+const ROLES = [
+  { id: "owner", icon: Crown, label: "Owner", title: "Sets up the platform", text: "Creates each organization and appoints the people who run it. Nothing else to manage.",
+    items: ["Create organizations", "Activate or deactivate access", "Appoint administrators"],
+    preview: [["Acme Inc.", "2 administrators", "Active"], ["Northwind", "1 administrator", "Active"], ["Globex", "3 administrators", "Inactive"]] },
+  { id: "admin", icon: UserCog, label: "Admin", title: "Runs the organization", text: "Builds teams, adds employees and hands out the work. This is where most of the action is.",
+    items: ["Create teams and employees", "Create and assign tasks", "Follow progress to done"],
+    preview: [["Sales team", "6 employees", "Active"], ["HR team", "4 employees", "Active"], ["Ops team", "5 employees", "Active"]] },
+  { id: "member", icon: User, label: "Team member", title: "Gets the work done", text: "Sees assigned tasks, updates their status and talks to the team in one place.",
+    items: ["View assigned tasks", "Update task status", "Chat with teammates"],
+    preview: [["Prepare onboarding plan", "Due Friday", "To do"], ["Fix invoice export", "Due Monday", "In progress"], ["Publish hiring policy", "Done", "Done"]] },
+];
+
+const pill = { Active: "bg-emerald-50 text-emerald-700", Inactive: "bg-slate-100 text-slate-500", "To do": "bg-slate-100 text-slate-600", "In progress": "bg-[#EEF1FF] text-[#4338FF]", Done: "bg-emerald-50 text-emerald-700" };
+
+const reduced = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+// True once the element has scrolled into view
+const useInView = (threshold = 0.15) => {
+  const ref = useRef(null);
+  const [seen, setSeen] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") return setSeen(true);
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [threshold]);
+  return [ref, seen];
+};
+
+const Reveal = ({ children, delay = 0, className = "" }) => {
+  const [ref, seen] = useInView(0.12);
+  return <div ref={ref} className={`tf-reveal ${seen ? "tf-in" : ""} ${className}`} style={{ transitionDelay: `${delay}ms` }}>{children}</div>;
+};
+
+// Counts up once it scrolls into view
+const CountUp = ({ to, suffix = "", duration = 1600 }) => {
+  const [ref, seen] = useInView(0.4);
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!seen) return;
+    if (reduced()) return setN(to);
+    let raf, start;
+    const tick = (t) => {
+      start = start ?? t;
+      const p = Math.min((t - start) / duration, 1);
+      setN(Math.round(to * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [seen, to, duration]);
+  return <span ref={ref}>{n}{suffix}</span>;
+};
+
+const Logo = ({ size = "h-9 w-9" }) => (
+  <span className="flex items-center gap-2.5">
+    <span className={`flex ${size} items-center justify-center rounded-[10px] bg-gradient-to-br from-[#4338FF] to-[#14B88A]`}>
+      <Zap size={18} className="text-white" fill="white" />
+    </span>
+    <span className="tf-head text-xl font-extrabold">TeamFlow</span>
+  </span>
+);
+
+const Feature = ({ icon: I, title, text, flip, children }) => (
+  <Reveal className="grid items-center gap-10 py-14 lg:grid-cols-2 lg:gap-20">
+    <div className={flip ? "lg:order-2" : ""}>
+      <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EEF1FF] to-white text-[#4338FF] ring-1 ring-[#4338FF]/10"><I size={22} /></span>
+      <h3 className="tf-head mt-5 text-3xl font-extrabold sm:text-4xl">{title}</h3>
+      <p className="mt-3 max-w-md text-lg leading-8 text-slate-600">{text}</p>
+    </div>
+    <div className="tf-lift rounded-3xl bg-white p-5 ring-1 ring-slate-200 sm:p-6">{children}</div>
+  </Reveal>
+);
+
 const LandingPage = () => {
-  const [mobileMenu, setMobileMenu] = React.useState(false);
   const nav = useNavigate();
-  const goToLogin = () => nav("/login");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [role, setRole] = useState("admin");
+  const barRef = useRef(null);
+  const tiltRef = useRef(null);
+  const active = ROLES.find((r) => r.id === role);
+  const go = () => nav("/login");
+
+  // Scroll progress bar
+  useEffect(() => {
+    const onScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${h > 0 ? window.scrollY / h : 0})`;
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Gentle 3D tilt that follows the pointer
+  const onTilt = (e) => {
+    const el = tiltRef.current;
+    if (!el || reduced()) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `perspective(900px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
+  };
+  const offTilt = () => { if (tiltRef.current) tiltRef.current.style.transform = ""; };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
-      {/* ================= NAVBAR ================= */}
+    <div className="tf-root min-h-screen overflow-x-hidden bg-[#F8F9FD] text-[#0E1530]">
+      <style>{styles}</style>
 
-      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
-          <a href="#" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950">
-              <div className="h-4 w-4 rounded-md bg-white" />
-            </div>
+      <div ref={barRef} className="fixed inset-x-0 top-0 z-[60] h-1 origin-left scale-x-0 bg-gradient-to-r from-[#4338FF] to-[#14B88A]" aria-hidden="true" />
 
-            <span className="text-xl font-bold tracking-tight">
-              TeamFlow
-            </span>
-          </a>
+      {/* NAVBAR */}
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-[#0E1530]/5 bg-[#F8F9FD]/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-6">
+          <a href="#top" aria-label="TeamFlow home"><Logo /></a>
 
-          <div className="hidden items-center gap-8 md:flex">
-            <a
-              href="#features"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-            >
-              Features
-            </a>
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+            {NAV.map(([l, h]) => (
+              <a key={l} href={h} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#EEF1FF] hover:text-[#4338FF]">{l}</a>
+            ))}
+          </nav>
 
-            <a
-              href="#workflow"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-            >
-              How it works
-            </a>
-
-            <a
-              href="#access"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-            >
-              Access control
-            </a>
-
-            <a
-              href="#pricing"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-            >
-              Pricing
-            </a>
+          <div className="hidden items-center gap-2 md:flex">
+            <button onClick={go} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-[#EEF1FF]">Sign in</button>
+            <button onClick={go} className="rounded-xl bg-[#0E1530] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#4338FF]">Get started</button>
           </div>
 
-          <div className="hidden items-center gap-3 md:flex">
-            <button onClick={goToLogin} className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
-              Sign in
-            </button>
-
-            <button onClick={goToLogin} className="flex items-center gap-2 rounded-lg bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">
-              Get started
-              <ArrowRight size={16} />
-            </button>
-          </div>
-
-          <button
-            onClick={() => setMobileMenu(!mobileMenu)}
-            className="rounded-lg p-2 text-slate-700 md:hidden"
-          >
-            {mobileMenu ? <X size={22} /> : <Menu size={22} />}
+          <button aria-label={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="mobile-nav" onClick={() => setMenuOpen((o) => !o)} className="rounded-lg p-2 md:hidden">
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
 
-        {mobileMenu && (
-          <div className="border-t border-slate-200 bg-white px-6 py-5 md:hidden">
-            <div className="flex flex-col gap-5">
-              <a href="#features" className="text-sm font-medium">
-                Features
-              </a>
-
-              <a href="#workflow" className="text-sm font-medium">
-                How it works
-              </a>
-
-              <a href="#access" className="text-sm font-medium">
-                Access control
-              </a>
-
-              <a href="#pricing" className="text-sm font-medium">
-                Pricing
-              </a>
-
-              <div className="border-t border-slate-200 pt-5">
-                <button onClick={goToLogin} className="mb-3 w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold">
-                  Sign in
-                </button>
-
-                <button onClick={goToLogin} className="w-full rounded-lg bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white">
-                  Get started
-                </button>
-              </div>
+        {menuOpen && (
+          <div id="mobile-nav" className="tf-swap border-t border-slate-200 bg-white px-6 py-5 md:hidden">
+            <div className="flex flex-col gap-4">
+              {NAV.map(([l, h]) => (
+                <a key={l} href={h} onClick={() => setMenuOpen(false)} className="text-sm font-medium">{l}</a>
+              ))}
+              <button onClick={() => { setMenuOpen(false); go(); }} className="rounded-lg border border-slate-200 py-2.5 text-sm font-semibold">Sign in</button>
+              <button onClick={() => { setMenuOpen(false); go(); }} className="rounded-lg bg-[#4338FF] py-2.5 text-sm font-semibold text-white">Get started</button>
             </div>
           </div>
         )}
-      </nav>
+      </header>
 
-      {/* ================= HERO ================= */}
+      <main id="top">
+        {/* HERO */}
+        <section className="relative">
+          <div className="tf-blob pointer-events-none absolute -right-32 top-10 h-[520px] w-[520px] rounded-full bg-[#4338FF]/20 blur-3xl" aria-hidden="true" />
+          <div className="tf-blob pointer-events-none absolute -left-40 top-96 h-[420px] w-[420px] rounded-full bg-[#14B88A]/20 blur-3xl" style={{ animationDelay: "-8s" }} aria-hidden="true" />
 
-      <main>
-        <section className="relative overflow-hidden pt-32">
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute left-1/2 top-0 h-[600px] w-[1000px] -translate-x-1/2 rounded-full bg-slate-100 blur-3xl" />
-          </div>
-
-          <div className="mx-auto max-w-7xl px-6 pb-24 pt-20 lg:px-8 lg:pb-32">
-            <div className="mx-auto max-w-4xl text-center">
-              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm">
-                <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-
-                <span className="text-sm font-medium text-slate-600">
-                  Built for modern organizations
+          <div className="relative mx-auto grid max-w-6xl items-center gap-16 px-6 pb-24 pt-32 lg:grid-cols-[1.1fr_1fr] lg:pt-40">
+            <div>
+              <p className="tf-rise mb-6 inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-slate-200">
+                <span className="relative flex h-2 w-2">
+                  <span className="tf-ping absolute inset-0 rounded-full bg-[#14B88A]" />
+                  <span className="relative h-2 w-2 rounded-full bg-[#14B88A]" />
                 </span>
+                Built for modern organizations
+              </p>
 
-                <ChevronRight
-                  size={14}
-                  className="text-slate-400"
-                />
-              </div>
-
-              <h1 className="text-5xl font-bold tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-                Run your organization.
-                <br />
-
-                <span className="text-slate-400">
-                  Empower your teams.
+              <h1 className="tf-head text-5xl font-extrabold leading-[1.02] sm:text-6xl lg:text-7xl">
+                <span className="tf-rise block" style={{ animationDelay: "100ms" }}>Run your organization.</span>
+                <span className="tf-rise block" style={{ animationDelay: "240ms" }}>
+                  <span className="tf-grad bg-gradient-to-r from-[#4338FF] via-[#14B88A] to-[#4338FF] bg-clip-text text-transparent">Empower your teams.</span>
                 </span>
               </h1>
 
-              <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600">
-                A focused workspace for managing organizations,
-                empowering admins, organizing teams, tracking work,
-                and keeping everyone connected.
+              <p className="tf-rise mt-6 max-w-lg text-lg leading-8 text-slate-600" style={{ animationDelay: "380ms" }}>
+                Create organizations, appoint admins, organize teams, track tasks and keep everyone talking, all in one workspace.
               </p>
 
-              <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <button onClick={goToLogin} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-slate-950/10 transition hover:bg-slate-800 sm:w-auto">
-                  Get started
-
-                  <ArrowRight
-                    size={17}
-                    className="transition group-hover:translate-x-1"
-                  />
+              <div className="tf-rise mt-9 flex flex-col gap-3 sm:flex-row" style={{ animationDelay: "500ms" }}>
+                <button onClick={go} className="tf-shine group inline-flex items-center justify-center gap-2 rounded-xl bg-[#4338FF] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#4338FF]/30 transition hover:scale-[1.03] hover:bg-[#3329d9]">
+                  Get started <ArrowRight size={17} className="transition group-hover:translate-x-1" />
                 </button>
-
-                <button onClick={() => document.getElementById("workflow")?.scrollIntoView({ behavior: "smooth" })} className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:w-auto">
+                <a href="#idea" className="inline-flex items-center justify-center rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 ring-1 ring-slate-200 transition hover:ring-[#4338FF]">
                   See how it works
-                </button>
+                </a>
               </div>
-
-              <p className="mt-4 text-xs text-slate-400">
-                Built for structured team management
-              </p>
             </div>
 
-            {/* Dashboard Preview */}
+            {/* Animated hierarchy card */}
+            <div className="tf-rise relative" style={{ animationDelay: "320ms" }}>
+              <div ref={tiltRef} onMouseMove={onTilt} onMouseLeave={offTilt} className="relative rounded-3xl bg-white p-6 shadow-2xl shadow-[#4338FF]/15 ring-1 ring-slate-200 transition-transform duration-200 sm:p-8" aria-label="Owner creates organizations, admins run teams, members do the work">
+                <span className="tf-line absolute bottom-[5.5rem] left-[3.1rem] top-14 w-px bg-gradient-to-b from-[#4338FF] via-[#14B88A] to-slate-200 sm:left-[3.6rem]" aria-hidden="true">
+                  <span className="tf-travel absolute -left-[3px] h-2 w-2 rounded-full bg-[#4338FF] shadow-[0_0_12px_#4338FF]" />
+                </span>
 
-            <div className="mx-auto mt-20 max-w-6xl">
-              <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-900/10">
-                <div className="overflow-hidden rounded-xl border border-slate-200">
-                  <div className="flex h-11 items-center gap-2 border-b border-slate-200 bg-slate-50 px-4">
-                    <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                    <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                    <div className="ml-4 h-6 flex-1 rounded-md bg-white" />
-                  </div>
-
-                  <div className="flex min-h-[480px] bg-slate-50">
-                    <div className="hidden w-56 border-r border-slate-200 bg-white p-4 sm:block">
-                      <div className="mb-8 flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-lg bg-slate-950" />
-                        <div className="h-3 w-20 rounded bg-slate-200" />
-                      </div>
-
-                      <div className="space-y-2">
-                        {[
-                          "Dashboard",
-                          "Teams",
-                          "Employees",
-                          "Tasks",
-                          "Chat",
-                        ].map((item, index) => (
-                          <div
-                            key={item}
-                            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 ${
-                              index === 0 ? "bg-slate-100" : ""
-                            }`}
-                          >
-                            <div className="h-4 w-4 rounded bg-slate-200" />
-                            <div className="h-2.5 w-20 rounded bg-slate-200" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex-1 p-5 sm:p-8">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="h-5 w-36 rounded bg-slate-800" />
-                          <div className="mt-2 h-3 w-52 rounded bg-slate-200" />
-                        </div>
-
-                        <div className="h-9 w-28 rounded-lg bg-slate-900" />
-                      </div>
-
-                      <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-                        {[
-                          "Teams",
-                          "Employees",
-                          "Tasks",
-                          "Completed",
-                        ].map((item) => (
-                          <div
-                            key={item}
-                            className="rounded-xl border border-slate-200 bg-white p-4"
-                          >
-                            <div className="h-3 w-16 rounded bg-slate-200" />
-                            <div className="mt-3 h-7 w-12 rounded bg-slate-800" />
-                            <div className="mt-3 h-2 w-20 rounded bg-slate-100" />
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-5 grid gap-5 lg:grid-cols-3">
-                        <div className="rounded-xl border border-slate-200 bg-white p-5 lg:col-span-2">
-                          <div className="mb-5 flex justify-between">
-                            <div className="h-4 w-28 rounded bg-slate-800" />
-                            <div className="h-4 w-16 rounded bg-slate-100" />
-                          </div>
-
-                          <div className="space-y-4">
-                            {[1, 2, 3, 4].map((item) => (
-                              <div
-                                key={item}
-                                className="flex items-center gap-4"
-                              >
-                                <div className="h-8 w-8 rounded-full bg-slate-100" />
-
-                                <div className="flex-1">
-                                  <div className="h-3 w-32 rounded bg-slate-200" />
-                                  <div className="mt-2 h-2 w-48 rounded bg-slate-100" />
-                                </div>
-
-                                <div className="h-6 w-16 rounded-full bg-slate-100" />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="rounded-xl border border-slate-200 bg-white p-5">
-                          <div className="h-4 w-24 rounded bg-slate-800" />
-
-                          <div className="mt-6 flex justify-center">
-                            <div className="flex h-36 w-36 items-center justify-center rounded-full border-[18px] border-slate-100">
-                              <div className="text-center">
-                                <div className="text-2xl font-bold">
-                                  78%
-                                </div>
-
-                                <div className="text-[10px] text-slate-400">
-                                  completed
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                {[
+                  [Crown, "Owner", "Creates Acme Inc.", "bg-[#0E1530] text-white", "0s"],
+                  [UserCog, "Admin", "Builds the Sales and HR teams", "bg-[#4338FF] text-white", "1.2s"],
+                  [User, "Team member", "Finishes the onboarding plan", "bg-[#14B88A] text-white", "2.4s"],
+                ].map(([I, who, what, tone, d], i) => (
+                  <div key={who} className={`relative flex items-center gap-4 ${i ? "mt-8" : ""}`}>
+                    <span className={`tf-glow z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${tone}`} style={{ animationDelay: d }}><I size={21} /></span>
+                    <div>
+                      <p className="tf-head text-lg font-bold">{who}</p>
+                      <p className="text-sm text-slate-500">{what}</p>
                     </div>
                   </div>
+                ))}
+
+                <div className="mt-8 flex items-center gap-3 rounded-2xl bg-[#F8F9FD] px-4 py-3">
+                  <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-200">
+                    <div className="tf-fill tf-shine h-full w-[78%] rounded-full bg-gradient-to-r from-[#4338FF] to-[#14B88A]" />
+                  </div>
+                  <span className="text-sm font-semibold tabular-nums text-slate-600"><CountUp to={78} suffix="% done" /></span>
+                </div>
+              </div>
+
+              {/* Floating notifications */}
+              <div className="tf-float absolute -left-6 -top-5 hidden sm:block">
+                <div className="tf-toast flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-xl ring-1 ring-slate-200">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF1FF] text-[#4338FF]"><Bell size={16} /></span>
+                  <div><p className="text-xs font-semibold">Task assigned</p><p className="text-xs text-slate-500">Onboarding plan to Priya</p></div>
+                </div>
+              </div>
+              <div className="tf-float absolute -bottom-6 -right-4 hidden sm:block" style={{ animationDelay: "-2.5s" }}>
+                <div className="tf-toast flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-xl ring-1 ring-slate-200" style={{ animationDelay: "4.5s" }}>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><Check size={16} /></span>
+                  <div><p className="text-xs font-semibold">Marked as done</p><p className="text-xs text-slate-500">Invoice export fix</p></div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ================= FEATURES ================= */}
+        {/* MARQUEE */}
+        <div className="tf-marquee-wrap overflow-hidden border-y border-slate-200 bg-white py-5" aria-hidden="true">
+          <div className="tf-marquee flex w-max gap-10">
+            {[...MARQUEE, ...MARQUEE].map((m, i) => (
+              <span key={i} className="flex items-center gap-10 whitespace-nowrap text-sm font-semibold text-slate-500">
+                {m} <Sparkles size={14} className="text-[#4338FF]" />
+              </span>
+            ))}
+          </div>
+        </div>
 
-        <section
-          id="features"
-          className="scroll-mt-24 py-24 lg:py-32"
-        >
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-sm font-semibold text-slate-500">
-                ONE WORKSPACE
-              </p>
+        {/* STATS */}
+        <section className="mx-auto grid max-w-6xl gap-5 px-6 py-20 sm:grid-cols-3">
+          {[[3, "", "Roles, one workspace"], [100, "%", "Role-based access"], [1, "", "Place for tasks and chat"]].map(([n, s, l], i) => (
+            <Reveal key={l} delay={i * 120} className="tf-lift rounded-3xl bg-white p-8 text-center ring-1 ring-slate-200">
+              <p className="tf-head text-6xl font-extrabold text-[#4338FF]"><CountUp to={n} suffix={s} /></p>
+              <p className="mt-2 text-sm font-medium text-slate-500">{l}</p>
+            </Reveal>
+          ))}
+        </section>
 
-              <h2 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                Everything your teams need to work together.
+        {/* THE IDEA */}
+        <section id="idea" className="relative scroll-mt-20 overflow-hidden bg-[#0E1530] py-24 text-white">
+          <div className="tf-blob pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[#4338FF]/30 blur-3xl" aria-hidden="true" />
+          <div className="relative mx-auto max-w-6xl px-6">
+            <Reveal>
+              <h2 className="tf-head max-w-3xl text-4xl font-extrabold leading-[1.05] sm:text-5xl">
+                You manage the organization. <span className="text-[#8c85ff]">Admins run the teams.</span>
               </h2>
-
-              <p className="mt-5 text-lg leading-8 text-slate-600">
-                Give your admins the tools to manage people and
-                teams, while employees stay focused on the work
-                assigned to them.
+              <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+                Platform control stays at the top. Everyone else gets a workspace built for their own responsibilities.
               </p>
-            </div>
+            </Reveal>
 
-            <div className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              <FeatureCard
-                icon={LayoutDashboard}
-                title="Role-specific dashboards"
-                description="Give owners, admins and employees a focused workspace based on their responsibilities."
-              />
-
-              <FeatureCard
-                icon={Users}
-                title="Team management"
-                description="Admins can create teams, organize employees and keep responsibilities clearly defined."
-              />
-
-              <FeatureCard
-                icon={ClipboardCheck}
-                title="Task management"
-                description="Create, assign, prioritize and track work across your teams."
-              />
-
-              <FeatureCard
-                icon={Kanban}
-                title="Progress tracking"
-                description="See what is pending, in progress and completed across your organization."
-              />
-
-              <FeatureCard
-                icon={MessageSquare}
-                title="Team chat"
-                description="Keep team conversations connected to the people doing the work."
-              />
-
-              <FeatureCard
-                icon={Zap}
-                title="Real-time collaboration"
-                description="Keep teams synchronized with real-time messages and task updates."
-              />
-            </div>
+            <ol className="mt-14 grid gap-5 md:grid-cols-4">
+              {["Owner creates the organization", "Owner appoints administrators", "Admins build teams and add employees", "Admins assign tasks and follow progress"].map((t, i) => (
+                <Reveal key={t} delay={i * 130}>
+                  <li className="tf-lift h-full list-none rounded-2xl bg-white/[0.06] p-6 ring-1 ring-white/10">
+                    <span className="tf-head bg-gradient-to-br from-[#8c85ff] to-[#5eead4] bg-clip-text text-4xl font-extrabold text-transparent">{i + 1}</span>
+                    <p className="mt-3 font-semibold leading-6">{t}</p>
+                  </li>
+                </Reveal>
+              ))}
+            </ol>
           </div>
         </section>
 
-        {/* ================= WORKFLOW ================= */}
+        {/* ROLES */}
+        <section id="roles" className="scroll-mt-20 py-24">
+          <div className="mx-auto max-w-6xl px-6">
+            <Reveal className="max-w-2xl">
+              <h2 className="tf-head text-4xl font-extrabold leading-tight sm:text-5xl">Clear roles. Clear responsibility.</h2>
+              <p className="mt-5 text-lg leading-8 text-slate-600">Pick a role to see what it can do and what its workspace shows.</p>
+            </Reveal>
 
-        <section
-          id="workflow"
-          className="scroll-mt-24 bg-slate-950 py-24 text-white lg:py-32"
-        >
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="grid items-center gap-16 lg:grid-cols-2">
-              <div>
-                <p className="text-sm font-semibold text-slate-400">
-                  STRUCTURED FROM THE TOP DOWN
-                </p>
-
-                <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-                  You manage the
-                  <br />
-                  organization.
-                  <br />
-                  Admins run the teams.
-                </h2>
-
-                <p className="mt-6 max-w-lg text-lg leading-8 text-slate-400">
-                  Keep platform-level control at the top while
-                  giving admins the responsibility to manage the
-                  people and work within their organization.
-                </p>
+            <Reveal className="mt-10">
+              <div role="tablist" aria-label="Roles" className="inline-flex gap-1 rounded-2xl bg-white p-1.5 ring-1 ring-slate-200">
+                {ROLES.map((r) => (
+                  <button
+                    key={r.id}
+                    role="tab"
+                    id={`tab-${r.id}`}
+                    aria-selected={role === r.id}
+                    aria-controls="role-panel"
+                    onClick={() => setRole(r.id)}
+                    className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${role === r.id ? "bg-[#0E1530] text-white shadow-lg" : "text-slate-600 hover:bg-[#EEF1FF] hover:text-[#4338FF]"}`}
+                  >
+                    <r.icon size={16} /> {r.label}
+                  </button>
+                ))}
               </div>
 
-              <div className="space-y-4">
-                <WorkflowStep
-                  number="01"
-                  title="Owner creates the organization"
-                  description="Set up and manage your organizations from the platform level."
-                />
-
-                <WorkflowStep
-                  number="02"
-                  title="Owner creates administrators"
-                  description="Give trusted administrators responsibility for running each organization."
-                />
-
-                <WorkflowStep
-                  number="03"
-                  title="Admins build their teams"
-                  description="Admins create teams, add employees and organize the people they manage."
-                />
-
-                <WorkflowStep
-                  number="04"
-                  title="Admins manage the work"
-                  description="Create tasks, assign employees, track progress and manage team collaboration."
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ================= ACCESS CONTROL ================= */}
-
-        <section
-          id="access"
-          className="scroll-mt-24 py-24 lg:py-32"
-        >
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="grid items-center gap-16 lg:grid-cols-2">
-              <div>
-                <div className="inline-flex rounded-xl bg-slate-100 p-3">
-                  <ShieldCheck
-                    size={25}
-                    className="text-slate-800"
-                  />
+              <div id="role-panel" role="tabpanel" aria-labelledby={`tab-${role}`} key={role} className="tf-swap mt-6 grid gap-6 rounded-3xl bg-white p-6 ring-1 ring-slate-200 sm:p-10 lg:grid-cols-2">
+                <div>
+                  <h3 className="tf-head text-3xl font-extrabold">{active.title}</h3>
+                  <p className="mt-3 text-slate-600">{active.text}</p>
+                  <ul className="mt-6 space-y-3">
+                    {active.items.map((it, i) => (
+                      <li key={it} className="tf-swap flex items-center gap-3 text-sm font-medium" style={{ animationDelay: `${120 + i * 90}ms` }}>
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#EEF1FF] text-[#4338FF]"><Check size={13} /></span>{it}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                <h2 className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
-                  Clear roles.
-                  <br />
-                  Clear responsibility.
-                </h2>
-
-                <p className="mt-6 text-lg leading-8 text-slate-600">
-                  Access starts at the administrator level. Admins
-                  manage the people, teams and work inside their
-                  organization, while employees focus on execution.
-                </p>
-
-                <div className="mt-8 space-y-4">
-                  {[
-                    "Owner controls organizations and administrators",
-                    "Admins manage teams and employees",
-                    "Admins create and assign tasks",
-                    "Employees manage their assigned work",
-                    "Team members collaborate through team chat",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-3"
-                    >
-                      <CircleCheck
-                        size={19}
-                        className="shrink-0 text-emerald-600"
-                      />
-
-                      <span className="text-sm font-medium text-slate-700">
-                        {item}
-                      </span>
+                <div className="rounded-2xl bg-[#F8F9FD] p-3">
+                  {active.preview.map(([a, b, c], i) => (
+                    <div key={a} className="tf-swap flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 transition hover:bg-white" style={{ animationDelay: `${150 + i * 100}ms` }}>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">{a}</p>
+                        <p className="text-xs text-slate-400">{b}</p>
+                      </div>
+                      <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${pill[c]}`}>{c}</span>
                     </div>
                   ))}
                 </div>
               </div>
-
-              <div className="grid gap-4">
-                {/* Owner */}
-
-                <RoleCard
-                  role="OWNER"
-                  title="Platform Owner"
-                  description="Controls the organization layer and administrator access."
-                  items={[
-                    "Create organizations",
-                    "Manage organizations",
-                    "Create administrators",
-                  ]}
-                />
-
-                {/* Admin */}
-
-                <RoleCard
-                  role="ADMIN"
-                  title="Organization Admin"
-                  description="The operational layer responsible for people and work."
-                  items={[
-                    "Manage teams",
-                    "Create and manage employees",
-                    "Create and assign tasks",
-                    "Manage team collaboration",
-                  ]}
-                />
-
-                {/* Employee */}
-
-                <RoleCard
-                  role="EMPLOYEE"
-                  title="Team Member"
-                  description="Focuses on assigned work and team collaboration."
-                  items={[
-                    "View assigned tasks",
-                    "Update task status",
-                    "Participate in team chat",
-                  ]}
-                />
-              </div>
-            </div>
+            </Reveal>
           </div>
         </section>
 
-        {/* ================= CTA ================= */}
+        {/* FEATURES */}
+        <section id="features" className="scroll-mt-20 pb-12">
+          <div className="mx-auto max-w-6xl divide-y divide-slate-200 px-6">
+            <Feature icon={ClipboardCheck} title="Tasks that never get lost" text="Create, assign and prioritize work across every team, and see what is overdue at a glance.">
+              {[["Prepare Q4 onboarding plan", "High", "bg-rose-100 text-rose-700", "0s"], ["Launch referral campaign", "Medium", "bg-amber-100 text-amber-700", "1.4s"], ["Publish hiring policy", "Low", "bg-emerald-100 text-emerald-700", "2.8s"]].map(([t, p, c, d]) => (
+                <div key={t} className="flex items-center gap-3 rounded-xl px-3 py-3">
+                  <span className="tf-check flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2" style={{ animationDelay: d }}><Check size={11} className="text-white" /></span>
+                  <span className="tf-strike flex-1 text-sm font-medium" style={{ animationDelay: d }}>{t}</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${c}`}>{p}</span>
+                </div>
+              ))}
+            </Feature>
 
-        <section className="px-6 pb-24 lg:px-8 lg:pb-32">
-          <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl bg-slate-100">
-            <div className="relative px-6 py-20 text-center sm:px-12 lg:px-20">
-              <div className="absolute left-1/2 top-0 -z-0 h-64 w-64 -translate-x-1/2 rounded-full bg-white blur-3xl" />
-
-              <div className="relative z-10">
-                <h2 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                  Give your admins
-                  <br />
-                  the power to run their teams.
-                </h2>
-
-                <p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-slate-600">
-                  Create the structure, empower your administrators,
-                  and give every team member a clear place to work.
+            <Feature flip icon={MessageSquare} title="Chat where the work happens" text="Conversations stay with the people doing the work, so nothing gets lost in another app.">
+              <div className="min-h-[190px] space-y-3 text-sm">
+                <p className="tf-msg w-fit max-w-[80%] rounded-2xl rounded-bl-md bg-[#F8F9FD] px-4 py-2.5">Is the invoice fix live?</p>
+                <p className="tf-msg ml-auto w-fit max-w-[80%] rounded-2xl rounded-br-md bg-[#4338FF] px-4 py-2.5 text-white" style={{ animationDelay: "1.4s" }}>Yes, marked as done.</p>
+                <p className="tf-msg w-fit max-w-[80%] rounded-2xl rounded-bl-md bg-[#F8F9FD] px-4 py-2.5" style={{ animationDelay: "2.8s" }}>Great, thanks!</p>
+                <p className="tf-msg flex w-fit gap-1 rounded-2xl rounded-bl-md bg-[#F8F9FD] px-4 py-3" style={{ animationDelay: "4s" }} aria-hidden="true">
+                  {[0, 1, 2].map((i) => <span key={i} className="tf-dot h-1.5 w-1.5 rounded-full bg-slate-400" style={{ animationDelay: `${i * 0.15}s` }} />)}
                 </p>
-
-                <button onClick={goToLogin} className="mt-8 inline-flex items-center gap-2 rounded-xl bg-slate-950 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-800">
-                  Get started
-                  <ArrowRight size={17} />
-                </button>
               </div>
-            </div>
+            </Feature>
+
+            <Feature icon={TrendingUp} title="See progress as it happens" text="Every team shows how much is to do, in progress and done, without asking anyone for a status update.">
+              {[["To do", "w-[30%]", "bg-slate-300"], ["In progress", "w-[45%]", "bg-[#4338FF]"], ["Done", "w-[78%]", "bg-[#14B88A]"]].map(([l, w, c]) => (
+                <div key={l} className="px-3 py-3">
+                  <p className="mb-2 text-sm font-medium text-slate-600">{l}</p>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-100"><div className={`tf-fill tf-shine h-full rounded-full ${w} ${c}`} /></div>
+                </div>
+              ))}
+            </Feature>
           </div>
+        </section>
+
+        {/* CTA */}
+        <section className="px-6 pb-24">
+          <Reveal className="relative mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#4338FF] via-[#5a4dff] to-[#14B88A] px-6 py-20 text-center text-white sm:px-12">
+            <div className="tf-blob pointer-events-none absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/15 blur-2xl" aria-hidden="true" />
+            <div className="tf-blob pointer-events-none absolute -bottom-24 -right-16 h-80 w-80 rounded-full bg-white/15 blur-2xl" style={{ animationDelay: "-6s" }} aria-hidden="true" />
+            <div className="relative">
+              <Users size={30} className="tf-float mx-auto" />
+              <h2 className="tf-head mx-auto mt-5 max-w-2xl text-4xl font-extrabold leading-tight sm:text-5xl">
+                Give your admins the power to run their teams.
+              </h2>
+              <p className="mx-auto mt-5 max-w-xl text-lg leading-8 text-white/85">
+                Create the structure, appoint your administrators and give every team member a clear place to work.
+              </p>
+              <button onClick={go} className="tf-shine group mt-9 inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 text-sm font-semibold text-[#0E1530] shadow-lg transition hover:scale-105">
+                Get started <ArrowRight size={17} className="transition group-hover:translate-x-1" />
+              </button>
+            </div>
+          </Reveal>
         </section>
       </main>
 
-      {/* ================= FOOTER ================= */}
-
+      {/* FOOTER */}
       <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <div className="flex flex-col justify-between gap-8 md:flex-row">
-            <div>
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950">
-                  <div className="h-3.5 w-3.5 rounded bg-white" />
-                </div>
-
-                <span className="font-bold">TeamFlow</span>
-              </div>
-
-              <p className="mt-4 max-w-xs text-sm leading-6 text-slate-500">
-                A focused workspace for organizations to empower
-                admins, manage teams and get work done.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-16 gap-y-8 sm:grid-cols-3">
-              <FooterColumn
-                title="Product"
-                links={[
-                  "Features",
-                  "How it works",
-                  "Access control",
-                  "Pricing",
-                ]}
-              />
-
-              <FooterColumn
-                title="Company"
-                links={[
-                  "About",
-                  "Careers",
-                  "Contact",
-                  "Blog",
-                ]}
-              />
-
-              <FooterColumn
-                title="Legal"
-                links={[
-                  "Privacy",
-                  "Terms",
-                  "Security",
-                ]}
-              />
-            </div>
-          </div>
-
-          <div className="mt-12 border-t border-slate-200 pt-8">
-            <p className="text-sm text-slate-400">
-              © 2026 TeamFlow. All rights reserved.
-            </p>
-          </div>
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-6 py-10 sm:flex-row sm:items-center">
+          <Logo size="h-8 w-8" />
+          <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500" aria-label="Footer">
+            {NAV.map(([l, h]) => (
+              <a key={l} href={h} className="transition hover:text-[#4338FF]">{l}</a>
+            ))}
+            <button onClick={go} className="transition hover:text-[#4338FF]">Sign in</button>
+          </nav>
+          <p className="text-sm text-slate-400">© 2026 TeamFlow</p>
         </div>
       </footer>
-    </div>
-  );
-};
-
-
-/* =========================================================
-   COMPONENTS
-========================================================= */
-
-const FeatureCard = ({
-  icon: Icon,
-  title,
-  description,
-}) => {
-  return (
-    <div className="group rounded-2xl border border-slate-200 bg-white p-7 transition duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/5">
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-800 transition group-hover:bg-slate-950 group-hover:text-white">
-        <Icon size={21} />
-      </div>
-
-      <h3 className="mt-6 text-lg font-bold text-slate-950">
-        {title}
-      </h3>
-
-      <p className="mt-3 text-sm leading-6 text-slate-600">
-        {description}
-      </p>
-
-      <div className="mt-6 flex items-center gap-1 text-sm font-semibold text-slate-900">
-        Learn more
-        <ArrowRight size={15} />
-      </div>
-    </div>
-  );
-};
-
-
-const WorkflowStep = ({
-  number,
-  title,
-  description,
-}) => {
-  return (
-    <div className="group flex gap-5 rounded-2xl border border-white/10 bg-white/[0.04] p-5 transition hover:bg-white/[0.07]">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-xs font-bold text-slate-950">
-        {number}
-      </div>
-
-      <div>
-        <h3 className="font-semibold text-white">
-          {title}
-        </h3>
-
-        <p className="mt-1 text-sm leading-6 text-slate-400">
-          {description}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-
-const RoleCard = ({
-  role,
-  title,
-  description,
-  items,
-}) => {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 transition hover:shadow-lg">
-      <div className="flex items-center justify-between">
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold tracking-wider text-slate-600">
-          {role}
-        </span>
-
-        <ShieldCheck
-          size={18}
-          className="text-slate-300"
-        />
-      </div>
-
-      <h3 className="mt-5 text-xl font-bold text-slate-950">
-        {title}
-      </h3>
-
-      <p className="mt-2 text-sm text-slate-500">
-        {description}
-      </p>
-
-      <div className="mt-5 space-y-2.5">
-        {items.map((item) => (
-          <div
-            key={item}
-            className="flex items-center gap-2 text-sm text-slate-600"
-          >
-            <Check
-              size={15}
-              className="text-emerald-600"
-            />
-
-            {item}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-
-const FooterColumn = ({ title, links }) => {
-  return (
-    <div>
-      <h4 className="text-sm font-semibold text-slate-950">
-        {title}
-      </h4>
-
-      <div className="mt-4 space-y-3">
-        {links.map((link) => (
-          <a
-            key={link}
-            href="#"
-            className="block text-sm text-slate-500 transition hover:text-slate-950"
-          >
-            {link}
-          </a>
-        ))}
-      </div>
     </div>
   );
 };

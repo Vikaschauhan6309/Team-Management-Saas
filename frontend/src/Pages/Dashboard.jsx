@@ -1,19 +1,19 @@
-import React from "react";
 import { useSelector } from "react-redux";
-import AdminDashboard from "../Components/Dashboard/AdminDashboard";
 import OwnerDashboard from "../Components/Dashboard/OwnerDashboard";
+import AdminDashboard from "../Components/Dashboard/AdminDashboard";
+import EmployeeDashboard from "../Components/Dashboard/EmployeeDashboard";
+
+const dashboards = {
+  owner: OwnerDashboard,
+  admin: AdminDashboard,
+  employee: EmployeeDashboard,
+};
+
 const Dashboard = () => {
   const user = useSelector((store) => store.user);
+  const RoleDashboard = dashboards[user.role];
 
-  if (user.role === "owner") {
-    return <OwnerDashboard />;
-  }
-
-  else if (user.role === "admin") {
-    return <AdminDashboard />;
-  }
-
-  return <h1>No Dashboard Found</h1>;
+  return RoleDashboard ? <RoleDashboard /> : null;
 };
 
 export default Dashboard;

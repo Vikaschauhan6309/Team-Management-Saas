@@ -1,34 +1,42 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { Navigate, Outlet } from 'react-router-dom';
-import { addUserData } from '../Utils/redux/userSlice';
-import axios from 'axios';
-import Loading from './Loading';
-
-const ProtectedRoute = () => {
-
-const userData=useSelector((store) => store.user);
-const dispatch = useDispatch();
-
-useEffect(() => {
-   axios.get(import.meta.env.VITE_BACKEND_URL+"/api/auth/me", { withCredentials: true })
-   .then((res) => {
-     console.log("User Data:", res.data);
-     // You can update your Redux store with the user data here if needed
-     dispatch(addUserData(res.data.data)); // Assuming you have an action to add user data to the store
-   })
-}, []);
+import { useEffect, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { Navigate, Outlet } from "react-router-dom"
+import api from "../Utils/api"
+import { addUserData } from "../Utils/redux/userSlice"
+import Loading from "./Loading"
 
 
+const ProtectedRoutes = () => {
 
-//   const isAuthenticated = false; // Replace with your authentication logic
-if(!userData)
-{
-    return <Loading />;
+    const userData = useSelector(store => store.user)
+    const dispatch = useDispatch()
+    const [failed, setFailed] = useState(false)
+
+    useEffect(() => {
+        if(userData) return
+
+        api.get("/api/auth/me")
+        .then((res) => {
+            dispatch(addUserData(res.data.data))
+        })
+        .catch(() => {
+            setFailed(true)
+        })
+    }, [userData, dispatch])
+
+
+    if(failed)
+    {
+        return <Navigate to="/login" replace />
+    }
+
+    if(!userData)
+    {
+        return <Loading />
+    }
+
+    return <Outlet />
+
 }
 
-  return <Outlet />;
-}; 
-
-
-export default ProtectedRoute
+export default ProtectedRoutes
