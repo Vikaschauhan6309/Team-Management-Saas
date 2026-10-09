@@ -38,7 +38,7 @@ const UserSchema = new mongoose.Schema({
     },
     organizationId : {
         type : mongoose.Schema.Types.ObjectId,
-        ref:"organization",
+        ref : "organization"
     },
     teamId : {
         type : mongoose.Schema.Types.ObjectId,
@@ -47,11 +47,18 @@ const UserSchema = new mongoose.Schema({
 
     isActive : {
         type : Boolean,
-        default : true 
+        default : true
     }
 
 }, {
-    timestamps : true
+    timestamps : true,
+    toJSON : {
+        // never send password hashes to the client
+        transform : (doc, ret) => {
+            delete ret.password
+            return ret
+        }
+    }
 })
 
 

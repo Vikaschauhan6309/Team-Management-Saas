@@ -3,20 +3,18 @@ const { User } = require("../Models/User.schema")
 
 
 
-const addOwner = (password, name, email) => {
+const addUser = (password, name, email, role) => {
 
-    
-
-    bcrypt.hash("maisabkabhagwan", 10)
+    bcrypt.hash(password, 10)
     .then((data) => {
         User.create({
             name ,
             email ,
             password : data,
-            role : "owner"
+            role : role
         })
     })
 }
 
 
-module.exports = { addOwner }
+module.exports = { addUser }

@@ -11,7 +11,7 @@ const createOrg = async(req, res) => {
 
     const { name, isActive } = req.body
 
-    if(!name.trim() || name.trim().length > 100)
+    if(!name || !name.trim() || name.trim().length > 100)
     {
         throw new AppError(400, "Invalid Name")
     }
@@ -36,9 +36,11 @@ const createOrg = async(req, res) => {
 
 const getAllOrgs = async(req, res) => {
 
-    const{skip, limit} = req.query
+    // skip = page index (0-based), limit = page size
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100)
+    const skip = Math.max(parseInt(req.query.skip) || 0, 0)
 
-    const data = await Organization.find().limit(limit).skip(skip * limit)
+    const data = await Organization.find().sort({createdAt : -1}).limit(limit).skip(skip * limit)
 
     res
     .status(200)
@@ -46,6 +48,8 @@ const getAllOrgs = async(req, res) => {
         data
     })
 }
+
+
 
 const getOrgsById =  async(req, res) => {
     const{ id } = req.params
@@ -75,7 +79,7 @@ const deleteOrg = async(req, res) => {
 
     if(!id || !mongoose.Types.ObjectId.isValid(id))
     {
-        throw new AppError("Invalid ID")
+        throw new AppError(400, "Invalid ID")
     }
 
     const data = await Organization.findByIdAndUpdate(id, {isActive : false}, {returnDocument : "after"}) // soft deletion hard delete
@@ -100,12 +104,12 @@ const updateOrg =  async(req, res) => {
 
     if(!id || !mongoose.Types.ObjectId.isValid(id))
     {
-        throw new AppError("Invalid ID")
+        throw new AppError(400, "Invalid ID")
     }
 
     const{name, isActive} = req.body
 
-    if(!name.trim() || name.trim().length > 100)
+    if(!name || !name.trim() || name.trim().length > 100)
     {
         throw new AppError(400, "Invalid Name")
     }
@@ -139,17 +143,17 @@ const createAdmin = async(req, res) => {
 
     const{ email, password, name} = req.body
 
-    if(!validator.isEmail(email))
+    if(!email || !validator.isEmail(email))
     {
         throw new AppError(400, `${email} is not a valid email`)
     }
 
-    if(!validator.isStrongPassword(password))
+    if(!password || !validator.isStrongPassword(password))
     {
-        throw new AppError(400, `${password} is not a strong password`)
+        throw new AppError(400, "Password must be at least 8 characters with uppercase, lowercase, number and symbol")
     }
 
-    if(!name.trim() || name.trim().length > 20 || name.trim().length < 2)
+    if(!name || !name.trim() || name.trim().length > 20 || name.trim().length < 2)
     {
         throw new AppError(400, "Invalid name")
     }
@@ -234,11 +238,11 @@ const getAdminById = async(req, res) => {
         throw new AppError(400,"Invalid ID")
     }
 
-    const foundUser = await User.findById(id)
+    const foundUser = await User.findOne({_id : id, role : "admin"})
 
     if(!foundUser)
     {
-        throw new AppError(404, "User does not exists")
+        throw new AppError(404, "Admin does not exists")
     }
 
     const foundOrg = await Organization.findById(foundUser.organizationId)
@@ -266,11 +270,11 @@ const activateAdmin = async(req, res) => {
         throw new AppError(400,"Invalid ID")
     }
 
-    const foundUser = await User.findById(id)
+    const foundUser = await User.findOne({_id : id, role : "admin"})
 
     if(!foundUser)
     {
-        throw new AppError(404, "User does not exists")
+        throw new AppError(404, "Admin does not exists")
     }
 
     foundUser.isActive = true
@@ -294,11 +298,11 @@ const deactivateAdmin = async(req, res) => {
         throw new AppError(400,"Invalid ID")
     }
 
-    const foundUser = await User.findById(id)
+    const foundUser = await User.findOne({_id : id, role : "admin"})
 
     if(!foundUser)
     {
-        throw new AppError(404, "User does not exists")
+        throw new AppError(404, "Admin does not exists")
     }
 
     foundUser.isActive = false
@@ -317,7 +321,5 @@ const deactivateAdmin = async(req, res) => {
 
 
 module.exports = {
-    deactivateAdmin ,
-    createOrg, getAllOrgs, getOrgsById, deleteOrg, updateOrg,
-     createAdmin, getAllAdmins, getAdminById, activateAdmin
+    deactivateAdmin ,createOrg, getAllOrgs, getOrgsById, deleteOrg, updateOrg, createAdmin, getAllAdmins, getAdminById, activateAdmin
 }

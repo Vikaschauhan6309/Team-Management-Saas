@@ -8,12 +8,12 @@ const isLoggedIn = async(req, res, next) => {
 
     if(!token)
     {
-        throw new AppError(400, "Please log in")
+        throw new AppError(401, "Please log in")
     }
 
     if(!validator.isJWT(token))
     {
-        throw new AppError(400, "Please provide a valid token")
+        throw new AppError(401, "Please provide a valid token")
     }
 
     const originalObject = jwt.verify(token, process.env.JWT_SECRET)
@@ -21,7 +21,12 @@ const isLoggedIn = async(req, res, next) => {
 
     if(!foundUser)
     {
-        throw new AppError(400, "User not found")
+        throw new AppError(401, "User not found")
+    }
+
+    if(!foundUser.isActive)
+    {
+        throw new AppError(403, "Your account has been deactivated")
     }
 
     req.user = foundUser
