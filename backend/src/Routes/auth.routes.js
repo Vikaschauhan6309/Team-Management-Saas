@@ -37,30 +37,33 @@ router.post("/login", async(req, res) => {
         expiresIn : "1d"
     })
 
-    res
-    .status(200)
-    .cookie("token", token, {
-        maxAge : 24 * 60 * 60 * 1000,
-        httpOnly : true,
-        sameSite : "strict",
-        // secure : true
-    })
-    .json({
-        message : "User logged in"
-    })
+   res
+  .status(200)
+  .cookie("token", token, {
+    maxAge: 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  })
+  .json({
+    message: "User logged in",
+  }); 
 
 })
 
 
 router.post("/logout", (req, res) => {
-    res
+  res
     .status(200)
-    .clearCookie("token")
-    .json({
-        message : "User logged out"
+    .clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
     })
-})
-
+    .json({
+      message: "User logged out",
+    });
+});
 
 router.get("/me", isLoggedIn ,async(req, res) => {
 
